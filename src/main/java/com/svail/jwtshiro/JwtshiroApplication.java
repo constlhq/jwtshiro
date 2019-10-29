@@ -1,5 +1,6 @@
 package com.svail.jwtshiro;
 
+import com.svail.jwtshiro.shiro.services.JwtAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -20,11 +21,15 @@ public class JwtshiroApplication {
 
   @Autowired
   DataSource dataSource;
+  @Autowired
+  JwtAuthService jwtAuthService;
 
   @Bean
   public ApplicationRunner applicationRunner(){
     return (arguments)->{
-      System.out.println(dataSource.getConnection().toString());
+      String token = jwtAuthService.issueJwt("lhq","admin,teacher");
+      System.out.println(token);
+      System.out.println(jwtAuthService.decodeJwt(token).getExpiresAt());
 
     };
   }
