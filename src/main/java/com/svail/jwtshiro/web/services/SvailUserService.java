@@ -42,4 +42,9 @@ public class SvailUserService implements IAccountProvider {
   public Set<String> findPermissions(String username) {
     return Arrays.stream(svailUserMapper.findPermissions(username).split(",")).collect(Collectors.toSet());
   }
+
+  public int createUser(SvailUser svailUser){
+    return  svailUserMapper.insertUser(svailUser);
+  }
+
 }

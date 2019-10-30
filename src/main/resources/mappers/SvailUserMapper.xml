@@ -2,23 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.svail.jwtshiro.web.mappers.SvailUserMapper">
 
-    <select id="findUserByUsername">
+    <select id="findUserByUsername" resultType="com.svail.jwtshiro.web.models.SvailUser">
         select * from svail_user where  username = #{username}
     </select>
-    <select id="findUserByEmail">
-        select * from svail_user where  username = #{username}
+    <select id="findUserByEmail" resultType="com.svail.jwtshiro.web.models.SvailUser">
+        select * from svail_user where  eamil = #{email}
     </select>
-    <select id="findUserByCellphone">
-        select * from svail_user where  username = #{username}
+    <select id="findUserByCellphone" resultType="com.svail.jwtshiro.web.models.SvailUser">
+        select * from svail_user where  cellphone = #{cellphone}
     </select>
-    <select id="findRoles">
+    <select id="findRoles" resultType="string">
         select roles from svail_user where  username = #{username}
     </select>
-    <select id="findPermissions">
+    <select id="findPermissions" resultType="string">
         select permissions from svail_user where  username = #{username}
     </select>
 
     <insert id="insertUser">
-        insert into svail_user(username,email,cellphone,password,credentialsSalt) value (#{username},#{email},#{cellphone},#{password},#{credentialsSalt})
+        insert into svail_user(username,email,cellphone,password,credentialsSalt,roles,permissions) values (#{username},#{email},#{cellphone},#{password},#{credentialsSalt},#{roles},#{permissions})
     </insert>
 </mapper>

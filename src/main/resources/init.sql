@@ -5,5 +5,7 @@ create table svail_user(
     email varchar(50),
     cellphone varchar(15),
     password varchar(255),
+    roles varchar(255),
+    permissions varchar(255),
     credentialsSalt varchar(255)
 );

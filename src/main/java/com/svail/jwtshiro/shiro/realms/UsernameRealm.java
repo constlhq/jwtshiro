@@ -17,7 +17,7 @@ public class UsernameRealm extends AuthorizingRealm {
 
   private static Pattern cellPhonePattern = Pattern.compile("^(?:\\+?86)?1(?:3\\d{3}|5[^4\\D]\\d{2}|8\\d{3}|7(?:[35678]\\d{2}|4(?:0\\d|1[0-2]|9\\d))|9[189]\\d{2}|66\\d{2})\\d{6}$");
   private static Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
-  private static Pattern userNamePattern = Pattern.compile("^[A-Za-z_@.]{6,10}$");
+  private static Pattern userNamePattern = Pattern.compile("^[A-Za-z_@.]{1,10}$");
 
   private IAccountProvider accountProvider;
 
@@ -34,7 +34,7 @@ public class UsernameRealm extends AuthorizingRealm {
   protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 
     String principal = (String)token.getPrincipal();
-    String password = (String)token.getCredentials();
+//    String password = (String)token.getCredentials();
 
 
     // Principal 可能是用户名，邮箱，手机号，在这里进行判断
@@ -55,10 +55,12 @@ public class UsernameRealm extends AuthorizingRealm {
 
     if (account == null) {
       //
+      System.out.println("bucunzai");
       throw  new AuthenticationException("用户不存在");
     }
 
     String username = account.getUsername();
+    String password = account.getPassword();
     String credentialsSalt = account.getCredentialsSalt();
 
     return new SimpleAuthenticationInfo(username,password,ByteSource.Util.bytes(credentialsSalt),getName());

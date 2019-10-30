@@ -1,6 +1,10 @@
 package com.svail.jwtshiro;
 
 import com.svail.jwtshiro.shiro.services.JwtAuthService;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
+import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -18,19 +22,43 @@ public class JwtshiroApplication {
     SpringApplication.run(JwtshiroApplication.class, args);
   }
 
-
   @Autowired
-  DataSource dataSource;
-  @Autowired
-  JwtAuthService jwtAuthService;
+  HashedCredentialsMatcher hashedCredentialsMatcher;
 
-  @Bean
-  public ApplicationRunner applicationRunner(){
-    return (arguments)->{
-      String token = jwtAuthService.issueJwt("lhq","admin,teacher");
-      System.out.println(token);
-      System.out.println(jwtAuthService.decodeJwt(token).getExpiresAt());
 
+
+//  @Autowired
+//  DataSource dataSource;
+//  @Autowired
+//  JwtAuthService jwtAuthService;
+
+//  @Bean
+//  public ApplicationRunner applicationRunner(){
+//    return (arguments)->{
+//      String token = jwtAuthService.issueJwt("lhq","admin,teacher");
+//      System.out.println(token);
+//      System.out.println(jwtAuthService.decodeJwt(token).getExpiresAt());
+//
+//    };
+//  }
+
+
+  @Bean ApplicationRunner applicationRunner(){
+    return args->{ boolean login =   hashedCredentialsMatcher.doCredentialsMatch(new AuthenticationToken() {
+                                                                 @Override
+                                                                 public Object getPrincipal() {
+                                                                   return "lhq";
+                                                                 }
+
+                                                                 @Override
+                                                                 public Object getCredentials() {
+                                                                   return "123456";
+                                                                 }
+                                                               },
+
+            new SimpleAuthenticationInfo("lhq", "d4e4b817ef195b90f8c1b854e0960dabe867a89c958ace36f33280f5d84afdb3", ByteSource.Util.bytes("54ce9e415f72eef175d2bdf5ebf9f61a"), "UsernameRealm")
+    );
+    System.out.println(login);
     };
   }
 

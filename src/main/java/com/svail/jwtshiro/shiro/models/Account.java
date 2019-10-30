@@ -5,10 +5,12 @@ import lombok.Data;
 
 @Data
 public class Account {
-  private String username;
-  private String email;
-  private String cellphone;
-  private String password;
-  private String credentialsSalt;
+  public String username;
+  public String email;
+  public String cellphone;
+  public String password;
+  public String roles;
+  public String permissions;
+  public String credentialsSalt;
 
 }
