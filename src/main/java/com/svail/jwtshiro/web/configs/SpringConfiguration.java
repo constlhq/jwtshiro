@@ -18,12 +18,16 @@ import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
+import java.util.Arrays;
 import java.util.HashMap;
 
 @Configuration
@@ -92,7 +96,7 @@ public class SpringConfiguration {
   @Bean
   public DefaultWebSessionManager defaultWebSessionManager(){
     DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
-    // ²»¿ªÆôsessionÑéÖ¤
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sessionï¿½ï¿½Ö¤
     sessionManager.setGlobalSessionTimeout(18000000);
     sessionManager.setSessionValidationSchedulerEnabled(false);
     sessionManager.setSessionIdCookie(simpleCookie());
@@ -106,8 +110,8 @@ public class SpringConfiguration {
   public DefaultWebSecurityManager defaultWebSecurityManager(AuthorizingRealm usernameRealm){
 
     DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-    // ModularRealmAuthenticator Ä¬ÈÏÊ¹ÓÃ AtLeastOneSuccessfulStrategy ²ßÂÔ,Ö»ÓÐÒ»¸ö jwtRealm Òò´ËÓÃÄ¬ÈÏ¼´¿É¡£
-    // ×Ô¶¨Òå SubjectFactory£¬²»´´½¨session
+    // ModularRealmAuthenticator Ä¬ï¿½ï¿½Ê¹ï¿½ï¿½ AtLeastOneSuccessfulStrategy ï¿½ï¿½ï¿½ï¿½,Ö»ï¿½ï¿½Ò»ï¿½ï¿½ jwtRealm ï¿½ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½Ï¼ï¿½ï¿½É¡ï¿½
+    // ï¿½Ô¶ï¿½ï¿½ï¿½ SubjectFactoryï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½session
     securityManager.setSessionManager(defaultWebSessionManager());
     securityManager.setRealm(usernameRealm);
     return  securityManager;
@@ -155,5 +159,19 @@ public class SpringConfiguration {
     }});
 
     return  shiroFilterFactoryBean;
+  }
+
+  @Bean
+  public FilterRegistrationBean shiroFilterBean(){
+    FilterRegistrationBean filterRegistrationBean  =  new FilterRegistrationBean();
+    DelegatingFilterProxy proxy = new DelegatingFilterProxy();
+    proxy.setTargetFilterLifecycle(true);
+    proxy.setTargetBeanName("shiroFilter");
+    filterRegistrationBean.setFilter(proxy);
+    filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST);
+    filterRegistrationBean.setAsyncSupported(true);
+    filterRegistrationBean.setOrder(0);
+    filterRegistrationBean.setUrlPatterns(Arrays.asList("/*"));
+    return filterRegistrationBean;
   }
 }
