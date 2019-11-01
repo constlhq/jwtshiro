@@ -2,10 +2,7 @@ package com.svail.jwtshiro.shiro.realms;
 
 import com.svail.jwtshiro.shiro.models.Account;
 import com.svail.jwtshiro.shiro.services.IAccountProvider;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -20,6 +17,11 @@ public class UsernameRealm extends AuthorizingRealm {
   private static Pattern userNamePattern = Pattern.compile("^[A-Za-z_@.]{1,10}$");
 
   private IAccountProvider accountProvider;
+
+  @Override
+  public boolean supports(AuthenticationToken token) {
+    return token instanceof UsernamePasswordToken;
+  }
 
   @Override
   public String getName() {

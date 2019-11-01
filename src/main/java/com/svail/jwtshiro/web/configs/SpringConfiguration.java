@@ -1,11 +1,15 @@
 package com.svail.jwtshiro.web.configs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.svail.jwtshiro.shiro.filters.JwtAuthcFilter;
 import com.svail.jwtshiro.shiro.realms.UsernameRealm;
 import com.svail.jwtshiro.shiro.services.IAccountProvider;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.authc.credential.HashingPasswordService;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.crypto.hash.Hash;
+import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
+import org.apache.shiro.mgt.DefaultSubjectDAO;
 import org.apache.shiro.mgt.SubjectFactory;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.session.mgt.eis.MemorySessionDAO;
@@ -13,8 +17,11 @@ import org.apache.shiro.session.mgt.eis.SessionDAO;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.mgt.DefaultWebSubjectFactory;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -79,13 +86,6 @@ public class SpringConfiguration {
 //  }
 
 
-  @Bean
-  public SimpleCookie simpleCookie(){
-    SimpleCookie simpleCookie = new SimpleCookie("sid");
-    simpleCookie.setMaxAge(18000000);
-    simpleCookie.setHttpOnly(true);
-    return simpleCookie;
-  }
 
   @Bean
   public SessionDAO sessionDAO(){
@@ -96,13 +96,19 @@ public class SpringConfiguration {
   @Bean
   public DefaultWebSessionManager defaultWebSessionManager(){
     DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
-    // ������session��֤
-    sessionManager.setGlobalSessionTimeout(18000000);
     sessionManager.setSessionValidationSchedulerEnabled(false);
-    sessionManager.setSessionIdCookie(simpleCookie());
-    sessionManager.setSessionDAO(sessionDAO());
-    sessionManager.setSessionIdCookieEnabled(true);
     return sessionManager;
+  }
+
+  @Bean
+  public SubjectFactory noSessionSubjectFactory(){
+    return new DefaultWebSubjectFactory(){
+      @Override
+      public Subject createSubject(SubjectContext context) {
+        context.setSessionCreationEnabled(false);
+        return super.createSubject(context);
+      }
+    };
   }
 
 
@@ -110,12 +116,17 @@ public class SpringConfiguration {
   public DefaultWebSecurityManager defaultWebSecurityManager(AuthorizingRealm usernameRealm){
 
     DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-    // ModularRealmAuthenticator Ĭ��ʹ�� AtLeastOneSuccessfulStrategy ����,ֻ��һ�� jwtRealm �����Ĭ�ϼ��ɡ�
-    // �Զ��� SubjectFactory��������session
-    securityManager.setSessionManager(defaultWebSessionManager());
     securityManager.setRealm(usernameRealm);
+    securityManager.setSubjectFactory(noSessionSubjectFactory());
+    securityManager.setSessionManager(defaultWebSessionManager());
+    ((DefaultSessionStorageEvaluator)((DefaultSubjectDAO)securityManager.getSubjectDAO()).getSessionStorageEvaluator()).setSessionStorageEnabled(false);
     return  securityManager;
 
+  }
+
+  @Bean
+  public JwtAuthcFilter jwtAuthcFilter(ObjectMapper objectMapper){
+    return new JwtAuthcFilter(objectMapper);
   }
 
 
@@ -127,33 +138,32 @@ public class SpringConfiguration {
 //  }
 
 
-  @Bean
-  FormAuthenticationFilter formAuthenticationFilter(){
-    FormAuthenticationFilter formAuthenticationFilter = new FormAuthenticationFilter();
-    formAuthenticationFilter.setUsernameParam("username");
-    formAuthenticationFilter.setPasswordParam("password");
-    formAuthenticationFilter.setLoginUrl("/login");
-    formAuthenticationFilter.setSuccessUrl("/home");
-    return formAuthenticationFilter;
-  }
+//  @Bean
+//  FormAuthenticationFilter formAuthenticationFilter(){
+//    FormAuthenticationFilter formAuthenticationFilter = new FormAuthenticationFilter();
+//    formAuthenticationFilter.setUsernameParam("username");
+//    formAuthenticationFilter.setPasswordParam("password");
+//    formAuthenticationFilter.setLoginUrl("/login");
+//    formAuthenticationFilter.setSuccessUrl("/home");
+//    return formAuthenticationFilter;
+//  }
 
   @Bean(name = "shiroFilter")
-  public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager){
+  public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager,JwtAuthcFilter jwtAuthcFilter){
     ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
     shiroFilterFactoryBean.setSecurityManager(securityManager);
     shiroFilterFactoryBean.setLoginUrl("/login");
     shiroFilterFactoryBean.setSuccessUrl("/home");
     shiroFilterFactoryBean.setUnauthorizedUrl("/unauthorized");
     shiroFilterFactoryBean.setFilters(new HashMap<String, Filter>(){{
-      put("authc",formAuthenticationFilter());
+      put("jwt",jwtAuthcFilter);
     }});
 
     shiroFilterFactoryBean.setFilterChainDefinitionMap(new HashMap<String,String>(){{
-      put("/login","authc");
-      put("/home","authc");
+      put("/login","anon");
+      put("/home","jwt");
       put("/index","anon");
       put("/signup","anon");
-      put("/unauthorized","anon");
       put("/logout","logout");
 //      put("/**", "authc");
     }});

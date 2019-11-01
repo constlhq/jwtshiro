@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.util.Date;
+
 
 //import org.postgresql.Driver
 @SpringBootApplication
@@ -58,7 +60,7 @@ public class JwtshiroApplication {
 
             new SimpleAuthenticationInfo("lhq", "d4e4b817ef195b90f8c1b854e0960dabe867a89c958ace36f33280f5d84afdb3", ByteSource.Util.bytes("54ce9e415f72eef175d2bdf5ebf9f61a"), "UsernameRealm")
     );
-    System.out.println(login);
+
     };
   }
 

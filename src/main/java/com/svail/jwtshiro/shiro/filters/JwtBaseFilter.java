@@ -18,7 +18,7 @@ public abstract class JwtBaseFilter  extends AccessControlFilter {
 
   protected boolean isJwtSubmission(@NotNull HttpServletRequest request) {
     String jwt  = request.getHeader("Authorization");
-    return !StringUtils.hasText(jwt);
+    return StringUtils.hasText(jwt);
   }
 
   protected AuthenticationToken createJwtToken(@NotNull HttpServletRequest request) {
