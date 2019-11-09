@@ -2,8 +2,10 @@ package com.svail.jwtshiro.web.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.svail.jwtshiro.shiro.filters.JwtAuthcFilter;
+import com.svail.jwtshiro.shiro.realms.JwtRealm;
 import com.svail.jwtshiro.shiro.realms.UsernameRealm;
 import com.svail.jwtshiro.shiro.services.IAccountProvider;
+import com.svail.jwtshiro.shiro.services.JwtAuthService;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.authc.credential.HashingPasswordService;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -40,12 +42,22 @@ import java.util.HashMap;
 @Configuration
 public class SpringConfiguration {
   @Bean
-  public AuthorizingRealm userNameRealm(IAccountProvider accountProvider){
+  public UsernameRealm userNameRealm(IAccountProvider accountProvider){
     UsernameRealm usernameRealm = new UsernameRealm();
     usernameRealm.setAccountProvider(accountProvider);
     usernameRealm.setCachingEnabled(false);
     usernameRealm.setCredentialsMatcher(hashedCredentialsMatcher());
     return usernameRealm;
+
+  }
+
+  @Bean
+  public JwtRealm jwtRealm(JwtAuthService jwtAuthService){
+    JwtRealm jwtRealm = new JwtRealm();
+    jwtRealm.setJwtAuthService(jwtAuthService );
+//    jwtRealm.setCachingEnabled(false);
+//    jwtRealm.setCredentialsMatcher(hashedCredentialsMatcher());
+    return jwtRealm;
 
   }
 
@@ -113,10 +125,11 @@ public class SpringConfiguration {
 
 
   @Bean
-  public DefaultWebSecurityManager defaultWebSecurityManager(AuthorizingRealm usernameRealm){
+  public DefaultWebSecurityManager defaultWebSecurityManager(UsernameRealm usernameRealm,JwtRealm jwtRealm){
 
     DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
     securityManager.setRealm(usernameRealm);
+    securityManager.setRealms(Arrays.asList(usernameRealm,jwtRealm));
     securityManager.setSubjectFactory(noSessionSubjectFactory());
     securityManager.setSessionManager(defaultWebSessionManager());
     ((DefaultSessionStorageEvaluator)((DefaultSubjectDAO)securityManager.getSubjectDAO()).getSessionStorageEvaluator()).setSessionStorageEnabled(false);

@@ -44,7 +44,7 @@ public class JwtAuthcFilter extends JwtBaseFilter{
        getSubject(request, response).login(jwtToken);
       return true;
     }
-    throw new AuthenticationException();
+    throw new AuthenticationException("String message");
   }
 
   @Override

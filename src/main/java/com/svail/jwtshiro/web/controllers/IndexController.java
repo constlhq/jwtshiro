@@ -1,6 +1,7 @@
 package com.svail.jwtshiro.web.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.svail.jwtshiro.shiro.services.JwtAuthService;
 import com.svail.jwtshiro.web.models.SvailUser;
 import com.svail.jwtshiro.web.services.PasswordService;
 import com.svail.jwtshiro.web.services.SvailUserService;
@@ -17,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-@RestController
+@Controller
 public class IndexController {
   @Autowired
   SvailUserService svailUserService;
@@ -25,11 +26,15 @@ public class IndexController {
   @Autowired
   PasswordService passwordService;
 
+  @Autowired
+  JwtAuthService jwtAuthService;
+
   @GetMapping("/index")
   public String index(){
     return "index";
   }
 
+  @ResponseBody
   @PostMapping("/login")
   public String login(@RequestBody Map<String,String> signupMap) throws AuthorizationException {
     String username = signupMap.get("username");
@@ -38,7 +43,9 @@ public class IndexController {
       UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(username,password);
       SecurityUtils.getSubject().login(usernamePasswordToken);
 
-    return "µÇÂ½³É¹¦";
+      String roles = svailUserService.findUserByUsername(username).roles;
+
+    return jwtAuthService.issueJwt(username,roles);
   }
 
 
@@ -48,6 +55,7 @@ public class IndexController {
   }
 
 
+  @ResponseBody
   @PostMapping("/signup")
   public String signup(@RequestBody Map<String,String> signupMap){
 

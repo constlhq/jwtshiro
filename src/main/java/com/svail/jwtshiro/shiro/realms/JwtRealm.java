@@ -11,6 +11,7 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,8 +32,10 @@ public class JwtRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 
-        token.getPrincipal();
         JwtToken jwtToken = (JwtToken)token;
+
+        if (jwtAuthService.decodeJwt((String)jwtToken.getPrincipal())==null)
+            throw new AuthenticationException();
 
         return new SimpleAuthenticationInfo(jwtToken, jwtToken.getCredentials(), getName());
     }
@@ -41,9 +44,10 @@ public class JwtRealm extends AuthorizingRealm {
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
 
-        Object principal = principals.getPrimaryPrincipal();
+        JwtToken principal = (JwtToken)principals.getPrimaryPrincipal();
 
         if (principal instanceof JwtToken ){
+            System.out.println("IN$$$$$$$$$$$");
             JwtToken jwtToken = (JwtToken)principals.getPrimaryPrincipal();
             DecodedJWT decodedJWT =  jwtAuthService.decodeJwt((String)jwtToken.getPrincipal());
             Set<String> roles = new HashSet<>(decodedJWT.getClaim("roles").asList(String.class));
