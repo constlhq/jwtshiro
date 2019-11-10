@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -34,6 +35,7 @@ public class IndexController {
     return "index";
   }
 
+
   @ResponseBody
   @PostMapping("/login")
   public String login(@RequestBody Map<String,String> signupMap) throws AuthorizationException {
@@ -45,13 +47,13 @@ public class IndexController {
 
       String roles = svailUserService.findUserByUsername(username).roles;
 
-    return jwtAuthService.issueJwt(username,roles);
+    return String.format("{\"token\":\"%s\"}", jwtAuthService.issueJwt(username,roles));
   }
 
-
-  @GetMapping("/home")
-  public String home(){
-    return "home";
+  @ResponseBody
+  @GetMapping("/apitest")
+  public Object apitest(){
+    return new HashMap<String,String>(){{put("status","ok");}};
   }
 
 

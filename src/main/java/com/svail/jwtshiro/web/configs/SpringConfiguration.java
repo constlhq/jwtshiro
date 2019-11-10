@@ -1,6 +1,7 @@
 package com.svail.jwtshiro.web.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.svail.jwtshiro.shiro.filters.ExceptionHandlerFilter;
 import com.svail.jwtshiro.shiro.filters.JwtAuthcFilter;
 import com.svail.jwtshiro.shiro.realms.JwtRealm;
 import com.svail.jwtshiro.shiro.realms.UsernameRealm;
@@ -173,12 +174,10 @@ public class SpringConfiguration {
     }});
 
     shiroFilterFactoryBean.setFilterChainDefinitionMap(new HashMap<String,String>(){{
-      put("/login","anon");
-      put("/home","jwt");
       put("/index","anon");
+      put("/login","anon");
       put("/signup","anon");
-      put("/logout","logout");
-//      put("/**", "authc");
+      put("/apitest", "jwt");
     }});
 
     return  shiroFilterFactoryBean;
@@ -193,8 +192,18 @@ public class SpringConfiguration {
     filterRegistrationBean.setFilter(proxy);
     filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST);
     filterRegistrationBean.setAsyncSupported(true);
-    filterRegistrationBean.setOrder(0);
+    filterRegistrationBean.setOrder(2);
     filterRegistrationBean.setUrlPatterns(Arrays.asList("/*"));
     return filterRegistrationBean;
+  }
+
+
+  @Bean
+  public FilterRegistrationBean<ExceptionHandlerFilter> loggingFilter(){
+    FilterRegistrationBean<ExceptionHandlerFilter> registrationBean = new FilterRegistrationBean<>();
+    registrationBean.setFilter(new ExceptionHandlerFilter());
+    registrationBean.addUrlPatterns("/*");
+    registrationBean.setOrder(1);
+    return registrationBean;
   }
 }

@@ -33,7 +33,7 @@ public class JwtAuthcFilter extends JwtBaseFilter{
 
   @Override
   protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws AuthenticationException {
-    // ·þÎñÆ÷ÎÞ×´Ì¬±£´æ£¬Ò»ÂÉÊ§°Ü
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½æ£¬Ò»ï¿½ï¿½Ê§ï¿½ï¿½
     return false;
   }
 
@@ -44,7 +44,7 @@ public class JwtAuthcFilter extends JwtBaseFilter{
        getSubject(request, response).login(jwtToken);
       return true;
     }
-    throw new AuthenticationException("String message");
+    throw new AuthenticationException("Authentication Failed");
   }
 
   @Override
